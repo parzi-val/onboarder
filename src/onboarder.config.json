@@ -6,6 +6,7 @@
     "**/.vscode/**",
     "**/.git/**",
     "**/.svn/**",
+    "**/*.wasm",
     "**/.hg/**",
     "**/CVS/**",
     "**/.DS_Store/**",
@@ -77,16 +78,60 @@
     ".svg": "XML"
   },
   "projectNameDetectors": [
-    { "file": "package.json", "parser": "json", "key": "name" },
-    { "file": "composer.json", "parser": "json", "key": "name" },
-    { "file": "pyproject.toml", "parser": "regex", "pattern": "name\\s*=\\s*\\\"(.*?)\\\"" },
-    { "file": "pom.xml", "parser": "regex", "pattern": "<artifactId>(.*?)<\\/artifactId>" },
-    { "file": "build.gradle", "parser": "regex", "pattern": "rootProject\\.name\\s*=\\s*['\"](.*?)['\"]" },
-    { "file": "build.gradle.kts", "parser": "regex", "pattern": "rootProject\\.name\\s*=\\s*\\\"(.*?)\\\"" },
-    { "file": "Cargo.toml", "parser": "regex", "pattern": "^\\s*name\\s*=\\s*\\\"(.*?)\\\"" },
-    { "file": "CMakeLists.txt", "parser": "regex", "pattern": "project\\((.*?)\\)" },
-    { "file": "Makefile.am", "parser": "regex", "pattern": "AM_INIT_AUTOMAKE\\((.*?),(.*?)\\)" },
-    { "file": "*.csproj", "parser": "regex", "pattern": "<AssemblyName>(.*?)<\\/AssemblyName>" },
-    { "file": "project.clj", "parser": "regex", "pattern": "\\(defproject\\s+(.*?)\\s+" }
+    {
+      "file": "package.json",
+      "parser": "json",
+      "key": "name"
+    },
+    {
+      "file": "composer.json",
+      "parser": "json",
+      "key": "name"
+    },
+    {
+      "file": "pyproject.toml",
+      "parser": "regex",
+      "pattern": "name\\s*=\\s*\\\"(.*?)\\\""
+    },
+    {
+      "file": "pom.xml",
+      "parser": "regex",
+      "pattern": "<artifactId>(.*?)<\\/artifactId>"
+    },
+    {
+      "file": "build.gradle",
+      "parser": "regex",
+      "pattern": "rootProject\\.name\\s*=\\s*['\"](.*?)['\"]"
+    },
+    {
+      "file": "build.gradle.kts",
+      "parser": "regex",
+      "pattern": "rootProject\\.name\\s*=\\s*\\\"(.*?)\\\""
+    },
+    {
+      "file": "Cargo.toml",
+      "parser": "regex",
+      "pattern": "^\\s*name\\s*=\\s*\\\"(.*?)\\\""
+    },
+    {
+      "file": "CMakeLists.txt",
+      "parser": "regex",
+      "pattern": "project\\((.*?)\\)"
+    },
+    {
+      "file": "Makefile.am",
+      "parser": "regex",
+      "pattern": "AM_INIT_AUTOMAKE\\((.*?),(.*?)\\)"
+    },
+    {
+      "file": "*.csproj",
+      "parser": "regex",
+      "pattern": "<AssemblyName>(.*?)<\\/AssemblyName>"
+    },
+    {
+      "file": "project.clj",
+      "parser": "regex",
+      "pattern": "\\(defproject\\s+(.*?)\\s+"
+    }
   ]
 }

@@ -18,28 +18,69 @@
         "title": "Hello World"
       },
       {
-        "command": "onboarder.openPane",
-        "title": "Onboarder: Open Panel"
+        "command": "onboarder.openGraph",
+        "title": "Onboarder: Open Dependency Graph"
+      },
+      {
+        "command": "onboarder.openGraphInBrowser",
+        "title": "Onboarder: Open Graph in Browser"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "onboarder-sidebar-view",
+          "title": "Onboarder",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "onboarder-sidebar-view": [
+        {
+          "type": "webview",
+          "id": "onboarder-sidebar",
+          "name": "Onboarder",
+          "contextualTitle": "Onboarder"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./ && copyfiles -u 1 src/onboarder.config.json out",
+    "compile": "tsc -p ./ && node build-script.js --production && copyfiles -u 1 src/onboarder.config.json out",
     "watch": "tsc -watch -p ./",
+    "watch:webview": "node build-script.js --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/emscripten": "^1.41.5",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
     "@types/vscode": "^1.108.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "copyfiles": "^2.4.1",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.1"
+  },
+  "dependencies": {
+    "@types/d3-force": "^3.0.10",
+    "@types/d3-polygon": "^3.0.2",
+    "@xyflow/react": "^12.10.0",
+    "d3-delaunay": "^6.0.4",
+    "d3-force": "^3.0.0",
+    "d3-polygon": "^3.0.1",
+    "elkjs": "^0.11.0",
+    "lucide-react": "^0.562.0",
+    "pixi.js": "^8.15.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   }
 }
