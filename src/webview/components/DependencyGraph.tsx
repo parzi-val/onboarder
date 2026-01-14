@@ -4,11 +4,13 @@ import { GraphEngine } from '../graph/GraphEngine';
 const DependencyGraph: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const engineRef = useRef<GraphEngine | null>(null);
+    const [toast, setToast] = useState<string | null>(null);
     const [modalData, setModalData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         if (!containerRef.current) return;
-
+        // ... (existing init code) ...
         // Initialize Engine
         if (!engineRef.current) {
             engineRef.current = new GraphEngine(containerRef.current);
@@ -17,32 +19,46 @@ const DependencyGraph: React.FC = () => {
             };
         }
 
-        // Data Fetching Logic
-        const isBrowser = (window as any).vscode === null && (window as any).acquireVsCodeApi === undefined;
-
-        if (isBrowser) {
-            fetch('/api/graph')
-                .then(res => res.json())
-                .then(data => {
-                    engineRef.current?.init(data.nodes, data.edges);
-                })
-                .catch(err => console.error("Failed to fetch graph data:", err));
-        } else {
-            const handleMessage = (event: MessageEvent) => {
-                const message = event.data;
-                if (message.type === 'graph-data') {
-                    const { nodes, edges } = message.payload;
-                    engineRef.current?.init(nodes, edges);
-                }
-            };
-            window.addEventListener('message', handleMessage);
-            return () => window.removeEventListener('message', handleMessage);
-        }
+        // Always fetch from Server API (Browser Mode)
+        fetch('/api/graph')
+            .then(res => res.json())
+            .then(data => {
+                engineRef.current?.init(data.nodes, data.edges);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch graph data:", err);
+                setIsLoading(false);
+            });
 
         return () => {
             engineRef.current?.dispose();
         };
     }, []);
+
+    const showToast = (msg: string) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const handleOpenFile = (path: string) => {
+        const filename = path.split(/[\\/]/).pop();
+        showToast(`Opening ${filename}...`); // Optimistic Toast
+
+        fetch('/api/open-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path })
+        }).then(res => {
+            if (!res.ok) {
+                console.error("Server API Failed", res.status);
+                showToast(`Error: Failed to open file`);
+            }
+        }).catch(err => {
+            console.error("Failed to open file via server:", err);
+            showToast(`Error: Connection failed`);
+        });
+    };
 
     return (
         <div
@@ -56,6 +72,57 @@ const DependencyGraph: React.FC = () => {
                 fontFamily: '"JetBrains Mono", monospace'
             }}
         >
+            {/* Loading Spinner */}
+            {isLoading && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: '#111111',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 5000,
+                    color: '#fff'
+                }}>
+                    <div style={{
+                        width: 40,
+                        height: 40,
+                        border: '4px solid #333',
+                        borderTop: '4px solid #fff',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <style>{`
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                     `}</style>
+                    <p style={{ marginTop: 16, fontSize: '0.9rem', color: '#888' }}>Initializing Graph...</p>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <div style={{
+                    position: 'absolute',
+                    top: 20,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#6BCB77',
+                    color: '#fff',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    fontWeight: 600,
+                    zIndex: 2000,
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    {toast}
+                </div>
+            )}
+
             {/* Controls Overlay */}
             <div style={{
                 position: 'absolute',
@@ -99,7 +166,7 @@ const DependencyGraph: React.FC = () => {
                             fontFamily: '"JetBrains Mono", monospace'
                         }}
                     >
-                        THEME_TOGGLE
+                        Theme
                     </button>
                     <button
                         onClick={() => {
@@ -120,7 +187,7 @@ const DependencyGraph: React.FC = () => {
                             fontFamily: '"JetBrains Mono", monospace'
                         }}
                     >
-                        RESET_CAM
+                        Reset
                     </button>
                 </div>
 
@@ -172,20 +239,7 @@ const DependencyGraph: React.FC = () => {
                             modalData.description
                         ) : modalData.type === 'node' ? (
                             <button
-                                onClick={() => {
-                                    // Lazy Loading VS Code API
-                                    const { getVsCodeApi } = require('../vscode-api');
-                                    const vscode = getVsCodeApi();
-
-                                    if (vscode) {
-                                        vscode.postMessage({
-                                            command: 'openFile',
-                                            path: modalData.path
-                                        });
-                                    } else {
-                                        console.error("VS Code API not available. Path:", modalData.path);
-                                    }
-                                }}
+                                onClick={() => handleOpenFile(modalData.path)}
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',

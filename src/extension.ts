@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { SidebarProvider } from './webviews/SidebarProvider';
-import { GraphPanel } from './webviews/GraphPanel';
+
 import { GraphServer } from './server/GraphServer';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -12,11 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('onboarder.openGraph', () => {
-      GraphPanel.createOrShow(context.extensionUri, context);
-    })
-  );
+
 
   const graphServer = new GraphServer(context);
   context.subscriptions.push(
